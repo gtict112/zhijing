@@ -10,7 +10,9 @@ import requests
 import win32api
 import win32com.client
 import win32con
+import cv2
 import win32gui
+from PyQt5 import QtGui
 from PyQt5.QtCore import pyqtSignal, QThread
 from PyQt5.QtWidgets import QApplication, QWidget, QMessageBox
 from PyQt5.QtGui import *
@@ -25,26 +27,16 @@ hwnd= 0
 win = 0
 title = ["标题","x1坐标","y1坐标","x2坐标","y2坐标"]
 config_path = 'config.csv'
+divpicture = "yuan.jpg"
+jietu1 = "zhijing.jpg"
+tech_no = "";
+tech_no1= "";
 def jietu():
     screen = QApplication.primaryScreen()
     img = screen.grabWindow(hwnd,476,102,1224,843).toImage()
-    img.save("screenshot.jpg")
+    img.save(jietu1)
 
-def jiexitupian():
-    ocr = PaddleOCR(use_angle_cls=True, use_gpu=False)  # 使用CPU预加载，不用GPU
-    result = ocr.ocr("screenshot.jpg",cls=True)  # 打开图片文件
-    # # 打印所有文本信息
-    # for t in text:
-    #     print(t)
 
-    image = Image.open("screenshot.jpg").convert('RGB')
-    boxes = [line[0] for line in result]
-    txts = [line[1][0] for line in result]
-    scores = [line[1][1] for line in result]
-    im_show = draw_ocr(image, boxes, txts, scores)
-    im_show = Image.fromarray(im_show)
-    im_show.show()
-    print("1111")
 def stoptech():
     time.sleep(1)
     pyautogui.moveTo(1752, 280, 0.25);
@@ -57,8 +49,82 @@ def stoptech():
     time.sleep(1);
     pyautogui.scroll(-100)
     time.sleep(0.5)
-    pyautogui.click(1600,900)
+    pyautogui.click(1600,890)
+    time.sleep(1)
+    pyautogui.click(1099,433)
+    time.sleep(0.2)
+
     # pyautogui.click(1080, 67); 工业开启点击
+
+def startech():
+    time.sleep(0.5)
+    pyautogui.moveTo(1053, 435)
+    pyautogui.scroll(100)
+    time.sleep(1)
+    pyautogui.click(800,449)
+    time.sleep(0.5)
+    pyautogui.moveTo(1053,435)
+    time.sleep(0.2)
+    pyautogui.click()
+    time.sleep(1)
+    pyautogui.press("backspace")
+    pyautogui.press("backspace")
+    pyautogui.press("backspace")
+    pyautogui.press("backspace")
+    pyautogui.press("backspace")
+    pyautogui.press("backspace")
+    pyautogui.typewrite(str(Win.tech_no))
+    time.sleep(1)
+    pyautogui.click(1597,747)  #产品确认
+    time.sleep(2)
+    pyautogui.click(800,635) #程式点击
+    time.sleep(2)
+    # pyautogui.click(1558,603)
+    # time.sleep(2)
+    # pyautogui.click(1558, 603)
+    # time.sleep(2)
+    # pyautogui.click(1630,523)
+    # time.sleep(2)
+    smallkeyokclick()
+    time.sleep(2)
+    pyautogui.click(1562,840)
+    time.sleep(2)
+    pyautogui.click(1356,636)
+    time.sleep(2)
+    pyautogui.click(1256, 809)
+    time.sleep(2)
+    pyautogui.click(903,608)
+def smallkeyokclick():
+   for techno in Win.tech_no1:
+       print(techno)
+       tech_onclick1(techno)
+
+def tech_onclick1(i):
+    time.sleep(1)
+    if i=='0':
+        pyautogui.click(1485,674)
+    elif i=='1':
+        pyautogui.click(1485,607)
+    elif i=='2':
+        pyautogui.click(1561,607)
+    elif i=='3':
+        pyautogui.click(1640,607)
+    elif i=='4':
+        pyautogui.click(1485,523)
+    elif i=='5':
+        pyautogui.click(1560,554)
+    elif i=='6':
+        pyautogui.click(1637,526)
+    elif i=='7':
+        pyautogui.click(1487,443)
+    elif i=='8':
+        pyautogui.click(1559,455)
+    elif i=='9':
+        pyautogui.click(1642,455)
+    else:
+        print("-----")
+
+
 
 def mixwindow():
     Win.showMinimized()
@@ -80,16 +146,39 @@ def loadData2(filename,i): #i表示列
 class MyMainForm(QMainWindow, Ui_Form):
     def __init__(self, parent=None):
         super(MyMainForm, self).__init__(parent)
+        self.tech_no = "";
+        self.tech_no1 = "";
         self.setupUi(self)
         self.pushButton_4.clicked.connect(self.machine_display)
         self.pushButton_3.clicked.connect(self.tupianparse)
         self.pushButton_2.clicked.connect(self.stoptechnology)
+        self.pushButton.clicked.connect(self.starttechnology)
+        self.pushButton_5.clicked.connect(self.display_img)
+    def display_img(self):
+
+        image = QtGui.QPixmap("screenshot.jpg").scaled(400,350)
+        self.label_29.setPixmap(image);
+        self.label_29.show()
+
     def stoptechnology(self):
         time.sleep(0.3)
         mixwindow()
         time.sleep(3)
         pyautogui.click(560, 171);
         stoptech()
+    def starttechnology(self):
+        mixwindow()
+        self.tech_no = self.lineEdit_27.text();
+        self.tech_no1 = self.lineEdit_28.text();
+        time.sleep(0.1)
+        pyautogui.click(560, 171);
+        time.sleep(0.5)
+        pyautogui.moveTo(1752, 280, 0.25);
+        pyautogui.click();
+        time.sleep(2)
+        pyautogui.moveTo(1600, 180, 0.25);
+        pyautogui.click(1600, 180);
+        startech()
     def machine_display(self):
         time.sleep(0.1)
         hwnd = win32gui.FindWindow("WindowsForms10.Window.8.app.0.378734a", None)
@@ -102,13 +191,6 @@ class MyMainForm(QMainWindow, Ui_Form):
         time.sleep(1)
         pyautogui.click(560,171);
         time.sleep(0.2)
-        # pyautogui.moveTo(1752,280,0.25);
-        # x,y=pyautogui.position();
-        # print(x,y)
-        # time.sleep(2)
-        # pyautogui.click(1600,180);
-        # time.sleep(1);
-        # pyautogui.click(1080,67);
         pyautogui.moveTo(300, 300, 0.25);
         pyautogui.click();
         time.sleep(0.5)
@@ -136,14 +218,21 @@ class MyMainForm(QMainWindow, Ui_Form):
         for i in range(len(x1)):
             path = "zhijing_{}.jpg".format(i);
             print(path)
+            tmp= "";
             result = ocr.ocr(path, cls=True)
             print("result",len(result))
             if len(result)==0:
                 textlist.append("无法识别")
             else:
-                for t in result:
-                    print(t[1][0])
-                    textlist.append(t[1][0])
+                for t in reversed(result):
+                    print(i,len(result),t[1][0])
+                    if len(result)==2:
+                        tmp = (str(t[1][0])) + " "+tmp;
+
+                    else:
+                        tmp = (str(t[1][0]))
+                    print(tmp)
+                textlist.append(tmp)
         for i in range(len(x1)):
             print("序号->",i,tx1[i],"---")
             if i ==0:
@@ -224,6 +313,9 @@ class MyMainForm(QMainWindow, Ui_Form):
             if i == 25:
                 self.label_26.setText(tx1[i])
                 self.lineEdit_26.setText(textlist[i])
+            if i == 26:
+                self.label_27.setText(tx1[i])
+                self.lineEdit_27.setText(textlist[i])
         textlist.clear()
 
 
@@ -232,8 +324,8 @@ class MyMainForm(QMainWindow, Ui_Form):
         print("12211111111111111111111111111111111")
         self.lineEdit.setText("112")
 
-def Messagebox():
-    box = QMessageBox(QMessageBox.Question, '信息', '确认完成')
+def Messagebox(message1,message2):
+    box = QMessageBox(QMessageBox.Question, message1, message2)
     box.exec_()
 
 def get_all_hwnd(hwnd, mouse):
@@ -257,7 +349,8 @@ class Mythread(QThread):
             self.breakSignal.emit(i)
 
 def dividepic():
-    im = Image.open("screenshot.jpg")
+
+    im = Image.open(divpicture)
     w, h = im.size
     print(w, h)
     x1 = loadData2(config_path,1)
@@ -277,6 +370,7 @@ def dividepic():
     im.close()
 
 if __name__ == '__main__':
+    dividepic()
     app = QApplication(sys.argv)
     Win = MyMainForm()
     Win.show()
